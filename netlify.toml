@@ -1,0 +1,14 @@
+[[redirects]]
+  from = "/auth/x/start"
+  to = "/.netlify/functions/x-start"
+  status = 200
+
+[[redirects]]
+  from = "/auth/x/callback"
+  to = "/.netlify/functions/x-callback"
+  status = 200
+
+[[redirects]]
+  from = "/auth/x/account"
+  to = "/.netlify/functions/x-account"
+  status = 200
