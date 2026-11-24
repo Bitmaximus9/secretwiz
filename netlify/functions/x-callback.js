@@ -40,12 +40,14 @@ export const handler = async (event) => {
 
   return {
     statusCode: 302,
-    headers: {
-      Location: '/?x=connected',
+    multiValueHeaders: {
       'Set-Cookie': [
         `x_username=${username}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`,
         `x_verifier=; Path=/; Max-Age=0`
       ]
+    },
+    headers: {
+      Location: '/?x=connected'
     }
   };
 };
