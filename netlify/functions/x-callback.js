@@ -1,57 +1,56 @@
+import { cookie, getConfig, matches, readCookie, redirect, signedUsername } from '../lib/x-oauth.mjs';
+
 export const handler = async (event) => {
-  const code = event.queryStringParameters?.code;
-  const verifier = (event.headers.cookie || '').match(/x_verifier=([^;]+)/)?.[1];
+  const config = getConfig();
+  const { code, error, state } = event.queryStringParameters || {};
+  const [expectedState, verifier] = (readCookie(event, 'x_oauth') || '').split('.');
+  const clearAttempt = cookie('x_oauth', '', 0);
+  const finish = (result) => redirect('/?x=' + result, [clearAttempt]);
+  if (!config) return finish('unavailable');
+  if (!verifier || !matches(state, expectedState)) return finish('failed');
+  if (error === 'access_denied') return finish('cancelled');
+  if (error || !code) return finish('failed');
 
-  if (!code) {
-    return { statusCode: 302, headers: { Location: '/?x=failed&reason=no_code' } };
-  }
-  if (!verifier) {
-    return { statusCode: 302, headers: { Location: '/?x=failed&reason=no_verifier' } };
-  }
-
-  const body = new URLSearchParams({
-    code,
-    grant_type: 'authorization_code',
-    client_id: process.env.X_CLIENT_ID,
-    redirect_uri: `${process.env.SITE_URL}/auth/x/callback`,
-    code_verifier: verifier
-  });
-
-  const tokenRes = await fetch('https://api.twitter.com/2/oauth2/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: 'Basic ' + Buffer.from(`${process.env.X_CLIENT_ID}:${process.env.X_CLIENT_SECRET}`).toString('base64')
-    },
-    body
-  });
-
-  const token = await tokenRes.json();
-  if (!token.access_token) {
-    const reason = token.error || 'token_failed';
-    return { statusCode: 302, headers: { Location: `/?x=failed&reason=${reason}` } };
-  }
-
-  const userRes = await fetch('https://api.twitter.com/2/users/me', {
-    headers: { Authorization: `Bearer ${token.access_token}` }
-  });
-  const user = await userRes.json();
-  const username = user.data?.username;
-
-  if (!username) {
-    return { statusCode: 302, headers: { Location: '/?x=failed&reason=no_username' } };
-  }
-
-  return {
-    statusCode: 302,
-    multiValueHeaders: {
-      'Set-Cookie': [
-        `x_username=${username}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`,
-        `x_verifier=; Path=/; Max-Age=0`
-      ]
-    },
-    headers: {
-      Location: '/?x=connected'
+  try {
+    const tokenRes = await fetch('https://api.x.com/2/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: 'Basic ' + Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64'),
+      },
+      body: new URLSearchParams({
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: config.redirectUri,
+        code_verifier: verifier,
+      }),
+    });
+    if (!tokenRes.ok) {
+      console.warn('X token exchange failed with HTTP status', tokenRes.status);
+      return finish('failed');
     }
-  };
+
+    const { access_token: accessToken } = await tokenRes.json();
+    if (typeof accessToken !== 'string' || !accessToken) return finish('failed');
+    const userRes = await fetch('https://api.x.com/2/users/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!userRes.ok) {
+      console.warn('X profile request failed with HTTP status', userRes.status);
+      return finish('failed');
+    }
+    const { data } = await userRes.json();
+    if (typeof data?.username !== 'string' || !/^[A-Za-z0-9_]{1,15}$/.test(data.username)) {
+      return finish('failed');
+    }
+    const maxAge = 86400;
+    const expires = Math.floor(Date.now() / 1000) + maxAge;
+    return redirect('/?x=connected', [
+      cookie('x_session', signedUsername(data.username, config.clientSecret, expires), maxAge),
+      clearAttempt,
+    ]);
+  } catch {
+    console.warn('X OAuth request could not be completed');
+    return finish('failed');
+  }
 };
