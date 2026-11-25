@@ -1,3 +1,6 @@
+[functions]
+  node_bundler = "esbuild"
+
 [[redirects]]
   from = "/auth/x/start"
   to = "/.netlify/functions/x-start"
