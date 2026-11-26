@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0060)file:///Users/antontoledano/Downloads/secretwiz-preview.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,7 +19,7 @@
     body:before { content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .12; background-image: linear-gradient(transparent 50%, #d9a6240b 50%); background-size: 100% 4px; }
     [hidden] { display:none !important; }
     .entrance { position:fixed; inset:0; z-index:1; display:grid; place-items:center; background:#000; }
-    .entrance .seal { display:grid; place-items:center; width:48px; min-height:48px; margin:0; padding:0; border:0; background:transparent; }
+    .entrance .seal { display:grid; place-items:center; gap:10px; min-width:100px; min-height:60px; margin:0; padding:8px 16px; border:0; background:transparent; color:var(--secondary); }
     .seal::before { content:''; width:14px; height:14px; border-radius:50%; background:var(--accent); box-shadow:0 0 18px #d9a62435; }
     .seal:focus-visible { outline:1px solid var(--secondary); outline-offset:0; border-radius:50%; }
     .frame { min-height: 100vh; display: grid; place-items: center; padding: 34px 20px; position: relative; }
@@ -69,14 +68,19 @@
     form { display:grid; gap:11px; text-align:left; }
     label { font:10px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:#9b978c; }
     .field { display:grid; gap:7px; }
-    input { width:100%; color:#f5f5f5; background:#101010; border:1px solid #514326; border-radius:0; padding:13px 14px; font:13px 'Courier New',monospace; transition:border-color .2s,background .2s; }
+    input { width:100%; color:#f5f5f5; background:#101010; border:1px solid #514326; border-radius:0; padding:13px 14px; font:16px 'Courier New',monospace; transition:border-color .2s,background .2s; }
     input::placeholder { color:#66645d; } input:focus { outline:0; border-color:var(--accent); background:#14130f; }
     button { margin-top:5px; min-height:47px; background:var(--accent); color:#171205; border:1px solid var(--accent); font:600 12px 'Courier New',monospace; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:background .2s,color .2s; }
     button:hover { background:transparent; color:var(--accent); } button:focus-visible { outline:2px solid #fff; outline-offset:3px; }
     .foot { margin:20px 0 0; color:#65635b; font:10px 'DM Mono',monospace; letter-spacing:.06em; }
     .task { display:flex; align-items:center; gap:11px; padding:12px 13px; border:1px solid #302f29; background:#101010; color:#e0e0e0; font-size:12px; cursor:pointer; }
     .task input,.agree input,.holder input { accent-color:var(--accent); width:15px; height:15px; flex:0 0 auto; margin:0; }
-    .task a { margin-left:auto; color:var(--accent); text-decoration:none; font:11px 'DM Mono',monospace; }
+    .task label { display:flex; flex:1; align-items:center; gap:10px; min-height:44px; color:inherit; cursor:pointer; }
+    .task a { display:grid; min-width:44px; min-height:44px; place-items:center; color:var(--accent); text-decoration:none; font:12px 'DM Mono',monospace; }
+    a:focus-visible, input[type=checkbox]:focus-visible { outline:2px solid var(--secondary); outline-offset:3px; }
+    .terms { text-align:left; margin-top:24px; color:#CCC3B0; font-size:13px; line-height:1.6; }
+    .terms h2 { font-size:13px; color:var(--secondary); }
+    button:disabled { opacity:.6; cursor:default; }
     .agree,.holder { display:flex; align-items:flex-start; gap:10px; color:#CCC3B0; font-size:11px; line-height:1.55; }
     .agree a { color:var(--accent); }
     .holder { padding:12px 13px; border:1px solid #302f29; text-align:left; }
@@ -84,12 +88,12 @@
     .connect:disabled { opacity:.55; cursor:default; }
     .connect { width:100%; min-height:43px; margin:0; background:transparent; color:var(--accent); }
     #status { min-height:18px; margin:12px 0 0; color:var(--secondary); font:11px 'DM Mono',monospace; }
-    @media(max-width:480px) { .card { padding:34px 24px 28px; } .member img { width:63px;height:63px; } }
+    @media(max-width:480px) { .card { padding:30px 16px 26px; min-width:0; } .crew { gap:clamp(10px, 4vw, 24px); } .member img { width:63px;height:63px; } }
   </style>
 </head>
 <body>
   <div class="entrance" id="entrance">
-    <button class="seal" id="seal" type="button" aria-label="Enter SecretWiz" aria-controls="site"></button>
+    <button class="seal" id="seal" type="button" aria-label="Enter SecretWiz" aria-controls="site">Enter</button>
   </div>
   <main class="frame" id="site" tabindex="-1" hidden>
     <section class="card" aria-label="SecretWiz allowlist">
@@ -110,29 +114,34 @@
       <div class="section-label">First, connect your X account</div>
       <p class="section-note">One X account. One application.</p>
       <button class="connect" id="connectX" type="button" disabled="">Connect X</button>
-      <p class="help" id="x-status" role="status" style="text-align:center;margin-top:9px">X sign-in requires the hosted site.</p>
+      <p class="help" id="x-status" role="status" style="text-align:center;margin-top:9px">Checking X sign-in…</p>
       <div class="section-label">Required social tasks</div>
-      <p class="section-note">Done a step? Tick it off. Tasks can be reviewed separately.</p>
-      <label class="task"><input form="allowlist" type="checkbox" name="follow">01 &nbsp; Follow the SecretWiz account <a href="https://x.com/" target="_blank" rel="noreferrer">↗</a></label>
-      <label class="task"><input form="allowlist" type="checkbox" name="repost">02 &nbsp; Repost the pinned post <a href="https://x.com/" target="_blank" rel="noreferrer">↗</a></label>
-      <label class="task"><input form="allowlist" type="checkbox" name="like">03 &nbsp; Like the pinned post <a href="https://x.com/" target="_blank" rel="noreferrer">↗</a></label>
+      <p class="section-note">Confirm each completed task. Entries are reviewed separately.</p>
+      <div class="task"><label><input form="allowlist" type="checkbox" name="follow" required> Follow SecretWiz</label><a href="https://x.com/secretwiz_rgb" target="_blank" rel="noopener noreferrer" aria-label="Open X to follow secretwiz">↗</a></div>
+      <div class="task"><label><input form="allowlist" type="checkbox" name="repost" required> Repost the pinned post</label><a href="https://x.com/secretwiz_rgb/status/2125952212434133039" target="_blank" rel="noopener noreferrer" aria-label="Open X to repost the pinned post">↗</a></div>
+      <div class="task"><label><input form="allowlist" type="checkbox" name="like" required> Like the pinned post</label><a href="https://x.com/secretwiz_rgb/status/2125952212434133039" target="_blank" rel="noopener noreferrer" aria-label="Open X to like the pinned post">↗</a></div>
       <div class="section-label">Your details</div>
-      <form id="allowlist" name="allowlist" method="POST" data-netlify="true" netlify-honeypot="company">
-        <input type="hidden" name="form-name" value="allowlist" />
-        <div class="field"><label for="handle">Your X handle</label><input id="handle" name="handle" placeholder="@yourhandle" autocomplete="username" required=""></div>
-        <div class="field"><label for="wallet">Your receiving address</label><input id="wallet" name="wallet" placeholder="Unisat, Masked, or DarkHorse Taproot wallet" autocomplete="off" required=""></div>
+      <form id="allowlist" method="post" action="/api/allowlist">
+        <div class="field"><label for="handle">Your X handle</label><input id="handle" placeholder="Connect X above" readonly></div>
+        <div class="field"><label for="wallet">Your receiving address</label><input id="wallet" name="wallet" autocapitalize="none" spellcheck="false" autocorrect="off" maxlength="300" placeholder="Unisat, Masked, or DarkHorse Taproot wallet" autocomplete="off" required=""></div>
         <p class="help">Use an address from a wallet you control. Never enter a seed phrase or private key.</p>
         <label class="agree"><input type="checkbox" name="agree" required=""><span>I agree to the <a href="#terms">registration terms</a> and understand my entry is pending review.</span></label>
-        <div class="field" aria-hidden="true" style="position:absolute;left:-9999px"><label for="company">Company</label><input id="company" name="company" tabindex="-1" autocomplete="off"></div>
-        <button type="submit">Join the allowlist ↗</button>
+        <button id="join" type="submit" disabled>Join the allowlist ↗</button>
       </form>
       <p id="status" role="status" aria-live="polite"></p>
+      <section class="terms" id="terms" aria-labelledby="terms-title">
+        <h2 id="terms-title">Registration terms</h2>
+        <p>Submit one application per X account. SecretWiz uses your X account details, receiving address, and task confirmations to review your application. Submitting an entry does not guarantee a spot or an NFT. Use a receiving address you control.</p>
+      </section>
       <p class="foot">KEEP YOUR KEYS. WE WILL NEVER ASK FOR THEM.</p>
     </section>
   </main>
   <script>
     const connect = document.getElementById('connectX');
     const xStatus = document.getElementById('x-status');
+    const handle = document.getElementById('handle');
+    const join = document.getElementById('join');
+    let connected = false;
     const url = new URL(window.location.href);
     const result = url.searchParams.get('x');
     const site = document.getElementById('site');
@@ -165,9 +174,9 @@
         }
         connect.disabled = false;
         if (username) {
-          const handle = document.getElementById('handle');
+          connected = true;
+          join.disabled = false;
           handle.value = '@' + username;
-          handle.readOnly = true;
           connect.textContent = 'Reconnect X';
         }
         const messages = {
@@ -175,10 +184,13 @@
           cancelled: 'X sign-in was cancelled.',
           unavailable: 'X sign-in is awaiting setup.',
         };
-        xStatus.textContent = Object.hasOwn(messages, result) ? messages[result] :
+        xStatus.textContent = Object.prototype.hasOwnProperty.call(messages, result) ? messages[result] :
           username ? 'Connected as @' + username : 'Authorize SecretWiz to read your X profile.';
+        if (result === 'connected' && !username) {
+          xStatus.textContent = 'Sign-in did not carry over. Open SecretWiz in your main browser and try again there.';
+        }
       } catch {
-        xStatus.textContent = 'X sign-in is unavailable on this preview.';
+        xStatus.textContent = 'X sign-in is temporarily unavailable. Refresh and try again.';
       }
     }
     showXAccount();
@@ -186,26 +198,37 @@
       event.preventDefault();
       const form = event.target;
       const status = document.getElementById('status');
-      const button = form.querySelector('button[type="submit"]');
-      button.disabled = true;
+      if (!connected) {
+        status.textContent = 'Connect your X account before submitting.';
+        return;
+      }
+      join.disabled = true;
       status.textContent = 'Submitting…';
       try {
-        const formData = new FormData(form);
-        const response = await fetch('/', {
+        const response = await fetch(form.action, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(formData).toString()
+          body: new URLSearchParams(new FormData(form)).toString()
         });
-        if (response.ok) {
-          status.textContent = 'Entry received. We will review it.';
-          form.reset();
-        } else {
-          throw new Error('Submission failed');
+        const outcome = await response.json();
+        status.textContent = outcome.message;
+        if (response.status === 401) {
+          connected = false;
+          handle.value = '';
+          connect.textContent = 'Connect X';
         }
-      } catch (err) {
+        if (response.status === 201 || response.status === 409) {
+          connected = false;
+          if (response.status === 201) {
+            const confirmedHandle = handle.value;
+            form.reset();
+            handle.value = confirmedHandle;
+          }
+        }
+      } catch {
         status.textContent = 'Could not submit. Please try again.';
       } finally {
-        button.disabled = false;
+        join.disabled = !connected;
       }
     });
   </script>
