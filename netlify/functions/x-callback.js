@@ -1,4 +1,4 @@
-import { cookie, getConfig, matches, readCookie, redirect, signedUsername } from '../lib/x-oauth.mjs';
+import { cookie, getConfig, matches, readCookie, redirect, signSession } from '../lib/x-oauth.mjs';
 
 export const handler = async (event) => {
   const config = getConfig();
@@ -40,13 +40,14 @@ export const handler = async (event) => {
       return finish('failed');
     }
     const { data } = await userRes.json();
-    if (typeof data?.username !== 'string' || !/^[A-Za-z0-9_]{1,15}$/.test(data.username)) {
+    if (typeof data?.id !== 'string' || !/^[0-9]{1,20}$/.test(data.id) ||
+        typeof data?.username !== 'string' || !/^[A-Za-z0-9_]{1,15}$/.test(data.username)) {
       return finish('failed');
     }
     const maxAge = 86400;
     const expires = Math.floor(Date.now() / 1000) + maxAge;
     return redirect('/?x=connected', [
-      cookie('x_session', signedUsername(data.username, config.clientSecret, expires), maxAge),
+      cookie('x_session', signSession(data, config.clientSecret, expires), maxAge),
       clearAttempt,
     ]);
   } catch {
